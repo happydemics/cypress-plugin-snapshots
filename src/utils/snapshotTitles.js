@@ -1,7 +1,9 @@
 const getTestTitle = require('./getTestTitle');
 
-const SNAPSHOTS_TEXT = {}
+const SNAPSHOTS_TEXT = {};
 const SNAPSHOTS_IMAGE = {};
+const SNAPSHOTS_RETRIES_TEXT = {};
+const SNAPSHOTS_IRETRIES_MAGE = {};
 
 const SNAPSHOT_TITLES_TEXT = [];
 const SNAPSHOT_TITLES_IMAGE = [];
@@ -14,9 +16,18 @@ function getSnapshotTitle(test, customName, customSeparator, isImage = false) {
   const name = customName || getTestTitle(test);
   const separator = customSeparator || ' #';
   const snapshots = isImage ? SNAPSHOTS_IMAGE : SNAPSHOTS_TEXT;
+  const retries = isImage ? SNAPSHOTS_RETRIES_IMAGE : SNAPSHOTS_RETRIES_TEXT;
+  const currentRetry = cy.state('runnable')._retries;
 
+  if (retries[name] === undefined) {
+    retries[name] = 0;
+  }
   if (snapshots[name] !== undefined) {
-    snapshots[name] += 1;
+    if (retries[name] !== currentRetry) {
+      snapshots[name] = 0;
+    } else {
+      snapshots[name] += 1;
+    }
   } else {
     snapshots[name] = 0;
   }
@@ -28,5 +39,5 @@ function getSnapshotTitle(test, customName, customSeparator, isImage = false) {
 
 module.exports = {
   getSnapshotTitle,
-  snapshotTitleIsUsed
-}
+  snapshotTitleIsUsed,
+};
